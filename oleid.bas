@@ -18,29 +18,39 @@ Attribute VB_Name = "OLEID"
 ' OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ' SOFTWARE.
 
-
-Sub SaveItemByEntryID()
+Sub DumpItemByEntryID()
     Dim EntryID As String
     EntryID = InputBox("EntryID", "Get EntryID")
     If IsEmpty(EntryID) Then
         Exit Sub
     End If
-    
+    Dim Result As String
+    Result = SaveItemByEntryID(EntryID, Environ("TEMP"))
+    If Not Result = "" Then
+        MsgBox "Item saved as " & Result, vbInformation, EntryID
+    Else
+        MsgBox "Item not found", vbExclamation, EntryID
+    End If
+End Sub
+
+Function SaveItemByEntryID(EntryID As String, Dir As String) As String
+    Dim Item As Object
     Set Item = GetItemByEntryID(EntryID)
     If Not Item Is Nothing Then
         EntryID = Item.EntryID
         Debug.Print Item & " " & TypeName(Item) & " " & EntryID
         
         Dim Path As String
-        Path = Environ("TEMP") & "\" & EntryID & ".msg"
+        Path = Dir & "\" & EntryID & ".msg"
         Item.SaveAs Path, olMSGUnicode
         
-        MsgBox "Item saved as " & Path, vbInformation, EntryID
+        SaveItemByEntryID = Path
     Else
         Debug.Print "- Nothing " & EntryID
-        MsgBox "Item not found", vbExclamation, EntryID
+        
+        SaveItemByEntryID = ""
     End If
-End Sub
+End Function
 
 Function GetItemByEntryID(ID As String) As Object
     On Error GoTo Error
